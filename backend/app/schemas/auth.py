@@ -7,6 +7,7 @@ class MeResponse(BaseModel):
 
     id: int = Field(..., description="Admin ID")
     username: str = Field(..., description="Username")
+    display_name: str
     email: str = Field(..., description="Email")
     created_at: str = Field(..., description="Creation time (ISO 8601)")
     role: str = Field(..., description="Effective Fund role")

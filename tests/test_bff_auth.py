@@ -127,3 +127,23 @@ def test_editor_write_requires_csrf():
         assert client.post(
             "/api/v1/resource", headers={"X-CSRF-Token": "fund-csrf"}
         ).status_code == 200
+
+
+def test_display_name_tracks_auth_without_changing_local_identity():
+    payload = userinfo(str(uuid4()), roles=["vestoria:viewer"])
+    payload["email"] = f"{uuid4().hex}@example.com"
+    original = callback(payload).json()["data"]["user"]
+    assert original["display_name"] == payload["nickname"]
+    session = {"access_token": "access", "refresh_token": "refresh", "csrf_token": "fund-csrf"}
+    with patch("app.api.auth.session_store.get", return_value=session), patch(
+        "app.api.auth.decode_auth_token", return_value={"sub": payload["sub"]}
+    ), patch("app.api.auth.httpx.get") as info_get:
+        info_get.return_value.status_code = 200
+        for nickname, expected in [("新昵称", "新昵称"), ("  ", payload["email"].split("@")[0]), (None, payload["email"].split("@")[0])]:
+            payload["nickname"] = nickname
+            info_get.return_value.json.return_value = payload
+            response = client.get("/api/v1/auth/me")
+            assert response.status_code == 200, response.text
+            current = response.json()["data"]
+            assert current["display_name"] == expected
+            assert (current["id"], current["username"]) == (original["id"], original["username"])
