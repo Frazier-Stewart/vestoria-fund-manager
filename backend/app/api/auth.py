@@ -31,6 +31,11 @@ VIEWER_ROLES = {"vestoria:viewer", "vestoria:editor", "vestoria:user", "vestoria
 EDITOR_ROLES = {"vestoria:editor", "vestoria:admin"}
 
 
+def _display_name(userinfo: dict) -> str:
+    """Use the live Auth profile for presentation; keep local identifiers stable."""
+    return (userinfo.get("nickname") or "").strip() or userinfo["email"].split("@")[0]
+
+
 def _role_flags(userinfo: dict) -> tuple[bool, bool]:
     roles = set(userinfo.get("roles", []))
     global_admin = GLOBAL_ADMIN in roles or userinfo.get("is_superuser", False)
@@ -149,6 +154,7 @@ def get_current_admin(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     admin.role = "editor" if can_edit else "viewer"
     admin.can_edit = can_edit
+    admin.display_name = _display_name(userinfo)
     return admin
 
 
@@ -238,6 +244,7 @@ def auth_callback(code: str, response: Response, db: Session = Depends(get_db)):
             user=MeResponse(
                 id=admin.id,
                 username=admin.username,
+                display_name=_display_name(userinfo),
                 email=admin.email,
                 created_at=admin.created_at.isoformat(),
                 role="editor" if can_edit else "viewer",
@@ -253,6 +260,7 @@ def get_me(current_admin: Admin = Depends(get_current_admin)):
         data=MeResponse(
             id=current_admin.id,
             username=current_admin.username,
+            display_name=current_admin.display_name,
             email=current_admin.email,
             created_at=current_admin.created_at.isoformat(),
             role=current_admin.role,

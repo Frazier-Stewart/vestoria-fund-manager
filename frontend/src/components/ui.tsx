@@ -15,7 +15,7 @@ export function WriteLink({to,children,className='',variant='default'}:{to:strin
   const canEdit=useAuthStore(s=>Boolean(s.user?.can_edit));
   return canEdit ? <Link to={to} className={'button '+variant+' '+className}>{children}</Link> : <Button disabled variant={variant} className={className} title="只读账号，需要 editor 权限">{children}</Button>;
 }
-export function PageHeader({ title, description, eyebrow = 'VESTORIA / FUND MANAGER', actions }: { title: string; description?: string; eyebrow?: string; actions?: ReactNode }) {
+export function PageHeader({ title, description, eyebrow = 'COMPOUND / FUND MANAGER', actions }: { title: string; description?: string; eyebrow?: string; actions?: ReactNode }) {
   return <header className="page-head"><div className="page-title"><div className="eyebrow">{eyebrow}</div><h1>{title}</h1>{description && <p>{description}</p>}</div>{actions && <div className="head-actions">{actions}</div>}</header>;
 }
 export function Panel({ title, caption, actions, children, className = '' }: { title?: string; caption?: string; actions?: ReactNode; children: ReactNode; className?: string }) {
@@ -25,7 +25,7 @@ export function Notice({ children, tone = 'info' }: { children: ReactNode; tone?
   return <div className={'notice ' + tone} role={tone === 'error' ? 'alert' : 'status'}><AlertCircle size={16} aria-hidden="true" /><div>{children}</div></div>;
 }
 export function Empty({ title = '暂无数据', description, children }: { title?: string; description?: string; children?: ReactNode }) {
-  return <div className="empty-state"><div className="empty-mark"><ArrowRight size={22} /></div><h3>{title}</h3>{description && <p>{description}</p>}{children}</div>;
+  return <div className="cu-empty"><div className="cu-empty-icon"><ArrowRight size={22} /></div><h3>{title}</h3>{description && <p>{description}</p>}{children}</div>;
 }
 export function Loading({ label = '正在加载真实数据…' }: { label?: string }) {
   return <div className="loading-state" role="status"><LoaderCircle className="spin" size={20} /><span>{label}</span></div>;
